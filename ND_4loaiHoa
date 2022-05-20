@@ -1,0 +1,69 @@
+https://colab.research.google.com/drive/1TU2TXweCvVFxcKGJPiwGfgmfGRjDW2cb?usp=sharing
+https://drive.google.com/drive/folders/1GsR8I8CdtQZBPgV6OrsygKsednVM8pET?usp=sharing
+
+from os import listdir
+from numpy import asarray
+from numpy import save
+from keras.preprocessing.image import load_img, img_to_array
+folder = '/content/drive/MyDrive/data_4loaiHoa/'
+photos,labels = list(),list()
+for file in listdir(folder):
+  output = 0.0
+  if file.startswith('MatTroi'):
+    output = 1.0
+  if file.startswith('ThuocDuoc'):
+    output = 2.0
+  if file.startswith('VanTho'):
+    output = 3.0
+  photo = load_img(folder + file, target_size=(150,150))
+  photo = img_to_array(photo)
+  photos.append(photo)
+  labels.append(output)
+photos = asarray(photos)
+labels = asarray(labels)
+print(photos.shape,labels.shape)
+save('ND_4loaiHoa_photos.npy',photos)
+save('ND_4loaiHoa_labels.npy',labels)
+from keras.layers.pooling import MaxPooling2D
+from keras.layers import Dense, Activation, BatchNormalization, Dropout, Conv2D, Flatten
+from keras.models import Sequential
+from tensorflow.keras.optimizers import RMSprop, SGD
+from keras.callbacks import EarlyStopping
+#tạo model
+model=Sequential()
+model.add(Conv2D(32,(3,3),activation='relu',kernel_initializer='he_uniform',padding='same',input_shape=(150,150,3)))
+model.add(MaxPooling2D((2,2)))
+model.add(Conv2D(64,(3, 3),activation='relu',kernel_initializer='he_uniform',padding='same'))
+model.add(MaxPooling2D((2,2)))
+model.add(Conv2D(128,(3, 3),activation='relu',kernel_initializer='he_uniform',padding='same'))
+model.add(MaxPooling2D((2,2)))
+model.add(Flatten())
+model.add(Dense(128,activation='relu',kernel_initializer='he_uniform'))
+model.add(Dense(4,activation='softmax'))
+model.compile(optimizer='Adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+#training
+history=model.fit(photos,labels,epochs=50,verbose=1)
+classes = ["Cuc","MatTroi","ThuocDuoc","VanTho"]
+from keras.preprocessing.image import load_img, img_to_array, array_to_img
+import numpy as np
+import matplotlib.pyplot as plt
+img = load_img('/content/images.jpg', target_size=(150,150))
+plt.imshow(img)
+img = img_to_array(img)
+img = img.reshape(1,150,150,3)
+img = img.astype('float32')
+y_pred = model.predict(img)
+print(y_pred)
+y_classes = [np.argmax(element) for element in y_pred]
+y_classes
+classes[y_classes[0]]
+img = load_img('/content/download.jpg', target_size=(150,150))
+plt.imshow(img)
+img = img_to_array(img)
+img = img.reshape(1,150,150,3)
+img = img.astype('float32')
+y_pred = model.predict(img)
+print(y_pred)
+y_classes = [np.argmax(element) for element in y_pred]
+y_classes
+classes[y_classes[0]]
